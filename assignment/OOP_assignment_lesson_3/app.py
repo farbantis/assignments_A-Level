@@ -9,6 +9,8 @@ class EmailAlreadyExistsException(Exception):
 
 
 class Employee:
+    FILE_NAME = 'emails.txt'
+
     def __init__(self, name, day_salary, email):
         self.name = name
         self.day_salary = day_salary
@@ -21,9 +23,10 @@ class Employee:
                 print(email, file=f)
             return True
 
-    def validate(self, email):
-        mode_ch = 'r' if Path('emails.txt').exists() else 'a+'
-        with open('emails.txt', mode_ch) as f:
+    @classmethod
+    def validate(cls, email):
+        mode_ch = 'r' if Path(cls.FILE_NAME).exists() else 'a+'
+        with open(cls.FILE_NAME, mode_ch) as f:
             if email in f.read():
                 raise EmailAlreadyExistsException('this email already exists', email)
             return True
