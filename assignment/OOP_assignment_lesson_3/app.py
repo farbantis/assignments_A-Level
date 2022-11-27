@@ -1,11 +1,32 @@
 import datetime
+from pathlib import Path
+
+
+class EmailAlreadyExistsException(Exception):
+    def __init__(self, text, email):
+        self.text = text
+        self.email = email
 
 
 class Employee:
-
-    def __init__(self, name, day_salary):
+    def __init__(self, name, day_salary, email):
         self.name = name
         self.day_salary = day_salary
+        if self.save_email(email):
+            self.email = email
+
+    def save_email(self, email):
+        if self.validate(email):
+            with open('emails.txt', 'a+') as f:
+                print(email, file=f)
+            return True
+
+    def validate(self, email):
+        mode_ch = 'r' if Path('emails.txt').exists() else 'a+'
+        with open('emails.txt', mode_ch) as f:
+            if email in f.read():
+                raise EmailAlreadyExistsException('this email already exists', email)
+            return True
 
     def check_salary(self, days=0):
         if not days:
@@ -82,24 +103,3 @@ class Developer(Employee):
         initial_str = super(Developer, self).work()
         return initial_str[:-1] + ' and start hiring'
 
-
-u = Employee('Kate', 20)
-u1 = Employee('Jane', 25)
-print(f'comparing salary of employee {u.name} vs {u1.name}, {u.day_salary} > {u1.day_salary}? > {u > u1}')
-
-a = Recruiter('alex', 10)
-print(f'check salary for mentioned days {a.check_salary(10)}')
-print(f'check salary for working days up to today excluding weekends {a.check_salary()}')
-
-b = Developer('john', 20, ['java', 'python', 'c++'])
-c = Developer('smith', 200, ['java', 'go', 'ruby'])
-d = Developer('Kale', 500, ['assembler'])
-print(a.work())
-print(b.work())
-print(c.work())
-
-print(f'comparing tech stack of {b.name} and {c.name} equal? {b == c}')
-print(f'comparing tech stack of {b.name} and {d.name} equal? {b == d}')
-
-y = c + b
-print(f'adding developers {c.name} and {b.name}, result> {y.name}, {y.tech_stack}')
